@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Sales & Financial Performance Dashboard | Tableau Replica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="dashboard_data.js"></script>
+  <style>
+    :root {
+      --bg-main: #0B0F19;
+      --bg-card: #151D2F;
+      --bg-card-hover: #1A243B;
+      --bg-filter: #1E293B;
+      --border-subtle: #243048;
+      --border-focus: #3B82F6;
+      --text-main: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --accent-blue: #2563EB;
+      --accent-cyan: #06B6D4;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #EF4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    /* HEADER & NAVIGATION */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #2563EB, #06B6D4);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+
+    .header-titles h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .header-titles p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-main);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      background: var(--accent-blue);
+      color: white;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* FILTERS & SLICERS BAR */
+    .filter-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+    }
+
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .filter-select {
+      background: var(--bg-filter);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .filter-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .filter-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .btn-export {
+      background: #10B981;
+      color: white;
+    }
+
+    .btn-export:hover {
+      background: #059669;
+    }
+
+    /* KPI CARDS GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .kpi-card.sales::before { background: var(--accent-blue); }
+    .kpi-card.profit::before { background: var(--accent-emerald); }
+    .kpi-card.margin::before { background: var(--accent-cyan); }
+    .kpi-card.orders::before { background: var(--accent-amber); }
+    .kpi-card.aov::before { background: #8B5CF6; }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .kpi-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* CHARTS LAYOUT */
+    .dashboard-view {
+      display: none;
+    }
+
+    .dashboard-view.active {
+      display: block;
+    }
+
+    .charts-row-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .charts-row-equal {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+
+    .chart-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .chart-box-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .chart-box-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .chart-canvas-wrapper {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    /* DATA TABLE */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--bg-filter);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .text-positive { color: var(--accent-emerald); font-weight: 600; }
+    .text-negative { color: var(--accent-rose); font-weight: 600; }
+
+    /* GLOSSARY / Q&A CARD */
+    .qa-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .qa-card h3 {
+      font-size: 15px;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+
+    .qa-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-row-2, .charts-row-equal {
+        grid-template-columns: 1fr;
+      }
+      .filter-actions {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <div class="brand-section">
+      <div class="brand-badge">Tableau BI Capstone</div>
+      <div class="header-titles">
+        <h1>Executive Sales & Financial Performance Dashboard</h1>
+        <p>Interactive Stakeholder Analytics • Dynamic Multi-Dimensional Slicers • 9,994 Orders</p>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab-btn active" onclick="switchTab('overview')">Executive Overview</button>
+      <button class="nav-tab-btn" onclick="switchTab('regional')">Regional Deep Dive</button>
+      <button class="nav-tab-btn" onclick="switchTab('products')">Product Profitability</button>
+      <button class="nav-tab-btn" onclick="switchTab('data')">Raw Data Table</button>
+      <button class="nav-tab-btn" onclick="switchTab('interview')">Interview Q&A</button>
+    </nav>
+  </header>
+
+  <!-- SLICERS & FILTERS -->
+  <section class="filter-panel">
+    <div class="filter-group">
+      <label class="filter-label" for="filterYear">Year Slicer</label>
+      <select id="filterYear" class="filter-select" onchange="applyFilters()">
+        <option value="ALL">All Fiscal Years (2021-2024)</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterRegion">Geographic Region</label>
+      <select id="filterRegion" class="filter-select" onchange="applyFilters()">
+        <option value="ALL">All Regions (US National)</option>
+        <option value="West">West Region</option>
+        <option value="East">East Region</option>
+        <option value="Central">Central Region</option>
+        <option value="South">South Region</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterCategory">Product Category</label>
+      <select id="filterCategory" class="filter-select" onchange="applyFilters()">
+        <option value="ALL">All Categories</option>
+        <option value="Technology">Technology</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Office Supplies">Office Supplies</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterSegment">Customer Segment</label>
+      <select id="filterSegment" class="filter-select" onchange="applyFilters()">
+        <option value="ALL">All Segments</option>
+        <option value="Consumer">Consumer</option>
+        <option value="Corporate">Corporate</option>
+        <option value="Home Office">Home Office</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-reset" onclick="resetFilters()">Reset Slicers</button>
+      <button class="btn btn-export" onclick="exportFilteredCSV()">Export Filtered CSV</button>
+    </div>
+  </section>
+
+  <!-- KPI SUMMARY CARDS -->
+  <section class="kpi-grid">
+    <div class="kpi-card sales">
+      <div class="kpi-header">
+        <span class="kpi-title">Total Sales Revenue</span>
+        <span class="kpi-badge" style="background: rgba(37,99,235,0.2); color: #60A5FA;">Top-line</span>
+      </div>
+      <div id="kpiSales" class="kpi-value">$13.05M</div>
+      <div id="kpiSalesSub" class="kpi-subtext">Cumulative gross volume</div>
+    </div>
+
+    <div class="kpi-card profit">
+      <div class="kpi-header">
+        <span class="kpi-title">Total Net Profit</span>
+        <span class="kpi-badge" style="background: rgba(16,185,129,0.2); color: #34D399;">Bottom-line</span>
+      </div>
+      <div id="kpiProfit" class="kpi-value">$1.39M</div>
+      <div id="kpiProfitSub" class="kpi-subtext">Post COGS & discounts</div>
+    </div>
+
+    <div class="kpi-card margin">
+      <div class="kpi-header">
+        <span class="kpi-title">Profit Margin</span>
+        <span class="kpi-badge" style="background: rgba(6,182,212,0.2); color: #22D3EE;">Efficiency</span>
+      </div>
+      <div id="kpiMargin" class="kpi-value">10.69%</div>
+      <div id="kpiMarginSub" class="kpi-subtext">Benchmark: > 10.0%</div>
+    </div>
+
+    <div class="kpi-card orders">
+      <div class="kpi-header">
+        <span class="kpi-title">Total Orders</span>
+        <span class="kpi-badge" style="background: rgba(245,158,11,0.2); color: #FBBF24;">Volume</span>
+      </div>
+      <div id="kpiOrders" class="kpi-value">4,998</div>
+      <div id="kpiOrdersSub" class="kpi-subtext">30,282 total units</div>
+    </div>
+
+    <div class="kpi-card aov">
+      <div class="kpi-header">
+        <span class="kpi-title">Average Order Value</span>
+        <span class="kpi-badge" style="background: rgba(139,92,246,0.2); color: #A78BFA;">Ticket Size</span>
+      </div>
+      <div id="kpiAOV" class="kpi-value">$2,611</div>
+      <div id="kpiAOVSub" class="kpi-subtext">Per order transaction</div>
+    </div>
+  </section>
+
+  <!-- VIEW 1: EXECUTIVE OVERVIEW -->
+  <main id="view-overview" class="dashboard-view active">
+    <div class="charts-row-2">
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div>
+            <div class="chart-box-title">Monthly Sales & Net Profit Time-Series Trend</div>
+            <div class="chart-box-subtitle">Dual-axis longitudinal analysis across selected timeframe</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div>
+            <div class="chart-box-title">Customer Segment Breakdown</div>
+            <div class="chart-box-subtitle">Sales contribution percentage</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="segmentChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row-equal">
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div>
+            <div class="chart-box-title">Regional Sales Comparison</div>
+            <div class="chart-box-subtitle">Geographic market revenue ranking</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="regionBarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div>
+            <div class="chart-box-title">Sub-Category Net Profit Matrix</div>
+            <div class="chart-box-subtitle">Profit champions vs margin leak sub-categories</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="categoryProfitChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- VIEW 2: REGIONAL DEEP DIVE -->
+  <section id="view-regional" class="dashboard-view">
+    <div class="charts-row-equal">
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div class="chart-box-title">Regional Profit Margin % Comparison</div>
+          <div class="chart-box-subtitle">Assessing territory operational efficiency</div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="regionMarginChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div class="chart-box-title">Regional Average Discount Rate</div>
+          <div class="chart-box-subtitle">Central territory exhibits aggressive discounting pressure</div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="regionDiscountChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 3: PRODUCT PROFITABILITY -->
+  <section id="view-products" class="dashboard-view">
+    <div class="chart-box" style="margin-bottom: 24px;">
+      <div class="chart-box-header">
+        <div class="chart-box-title">Comprehensive Product Sub-Category Diagnostic</div>
+        <div class="chart-box-subtitle">Comparing Total Sales vs Net Profit margin</div>
+      </div>
+      <div class="chart-canvas-wrapper" style="height: 440px;">
+        <canvas id="subcatFullChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 4: RAW DATA TABLE -->
+  <section id="view-data" class="dashboard-view">
+    <div class="table-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 16px;">Filtered Transaction Records (Showing First 50)</h2>
+        <span id="tableRecordCount" style="color: var(--text-muted); font-size: 13px;"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Region</th>
+            <th>Segment</th>
+            <th>Category</th>
+            <th>Sub-Category</th>
+            <th>Sales</th>
+            <th>Profit</th>
+            <th>Margin %</th>
+            <th>Discount</th>
+          </tr>
+        </thead>
+        <tbody id="rawTableBody">
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VIEW 5: INTERVIEW Q&A PREPARATION -->
+  <section id="view-interview" class="dashboard-view">
+    <div style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 4px;">Task 4: Internship Interview Questions & Comprehensive Solutions</h2>
+      <p style="color: var(--text-secondary); font-size: 13px;">Curated by Senior BI Analysts for technical viva and dashboard portfolio defense.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>1. What are the key elements of a dashboard?</h3>
+      <p>A well-structured business intelligence dashboard contains six fundamental elements:
+      <br>• <strong>KPI Summary Cards / BANs (Big Angry Numbers):</strong> High-level quantitative totals (e.g., Total Sales, Net Profit) positioned at the top for immediate executive scanning.
+      <br>• <strong>Time-Series Visualizations:</strong> Line or dual-axis charts showing trends, seasonality, and moving averages over time.
+      <br>• <strong>Interactive Slicers / Filters:</strong> Controls (Date range, Region, Category) enabling stakeholders to slice and cross-filter data dynamically.
+      <br>• <strong>Categorical & Distribution Charts:</strong> Bar charts, waterfall charts, and scatter plots revealing performance drivers and outliers.
+      <br>• <strong>Visual Hierarchy & Consistent Color Palette:</strong> Thoughtful semantic colors (e.g., green for profit, red for loss) and 8px grid layout avoiding cognitive overload.
+      <br>• <strong>Navigation & Contextual Metadata:</strong> Tab menus, drill-downs, dynamic tooltips, and data refresh stamps.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>2. What is a KPI?</h3>
+      <p>A <strong>Key Performance Indicator (KPI)</strong> is a measurable metric evaluated over time against defined strategic targets to assess organizational effectiveness. Unlike simple operational counts, a KPI must be <em>actionable, relevant, and tied to strategic goals</em>. Examples in this dashboard include <strong>Total Sales Revenue</strong> (top-line volume), <strong>Net Profit</strong> (bottom-line health), and <strong>Profit Margin %</strong> (capital efficiency).</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>3. What are slicers in Power BI?</h3>
+      <p>Slicers in Power BI are visual canvas filters that allow dashboard consumers to filter all other visualizations on the report page simultaneously without navigating backend filter panes. They support dropdown, button/tile, slider, and hierarchy modes. In Tableau, the functional equivalents are <strong>Quick Filters</strong>, <strong>Parameters</strong>, and <strong>Worksheet Filter Actions</strong>.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>4. Difference between Power BI and Tableau?</h3>
+      <p>• <strong>Data Modeling & Calculation Engine:</strong> Power BI uses <em>DAX (Data Analysis Expressions)</em> and tabular data models (VertiPaq engine). Tableau uses <em>Level of Detail (LOD) expressions</em>, Table Calculations, and the Hyper in-memory engine.
+      <br>• <strong>Visual Flexibility:</strong> Tableau provides greater granular control over custom visual marks, dual axes, and bespoke statistical charts. Power BI excels in standardized corporate matrix/table visuals and custom AppSource visuals.
+      <br>• <strong>Ecosystem & Cost:</strong> Power BI is tightly integrated with Microsoft 365, Azure, and Fabric at a lower entry licensing cost ($10/user/mo). Tableau is deeply embedded in Salesforce with powerful enterprise Tableau Server/Cloud capabilities.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>5. How do you make a dashboard interactive?</h3>
+      <p>Interactivity transforms static reports into analytical decision engines via:
+      <br>• <strong>Filter & Parameter Actions:</strong> Clicking a region in a map or bar filters all sub-category charts automatically.
+      <br>• <strong>Drill-Down / Drill-Through:</strong> Allowing users to click from Year &rarr; Quarter &rarr; Month or Region &rarr; City &rarr; Order ID.
+      <br>• <strong>Dynamic Tooltips:</strong> Displaying micro-sparklines or contextual diagnostic data on hover (Viz-in-Tooltip).
+      <br>• <strong>Metric Toggle Parameters:</strong> Switching axes dynamically between Sales, Profit, and Quantity without cluttering the screen.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>6. How do you deal with large datasets in dashboards?</h3>
+      <p>• <strong>Pre-Aggregation & Pushdown SQL:</strong> Aggregate transactional line items to daily/regional rollups in the database/data warehouse (Snowflake/BigQuery).
+      <br>• <strong>Extracts vs Direct Query:</strong> In Tableau, convert Live Connections to compressed <em>.hyper extracts</em>; in Power BI, use Import mode with VertiPaq compression.
+      <br>• <strong>Incremental Refresh:</strong> Query only new or modified records rather than rebuilding historical partitions.
+      <br>• <strong>Schema Optimization:</strong> Adopt Star Schemas, eliminate high-cardinality unused string columns, and avoid complex row-by-row calculated columns.</p>
+    </div>
+
+    <div class="qa-card">
+      <h3>7. What chart types do you use for trend analysis?</h3>
+      <p>• <strong>Line Charts:</strong> The gold standard for continuous time-series, highlighting trajectory, cyclical patterns, and inflection points.
+      <br>• <strong>Dual-Axis Line & Bar Charts:</strong> Correlating volume (Sales as bars) against profitability (Profit as lines).
+      <br>• <strong>Area Charts:</strong> Emphasizing cumulative volume over time or stacked component shares.
+      <br>• <strong>Moving Average Curves:</strong> Smoothing out short-term noise to isolate underlying 7-day or 90-day trajectory.
+      <br>• <strong>Sparklines:</strong> Compact micro-lines embedded inside KPI cards for immediate context.</p>
+    </div>
+  </section>
+
+  <script>
+    let activeTab = 'overview';
+    let filteredData = [...RAW_SALES_DATA];
+
+    let chartInstances = {};
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(`view-${tabId}`).classList.add('active');
+
+      // Trigger resize for charts in newly displayed views
+      setTimeout(() => {
+        Object.values(chartInstances).forEach(c => c && c.resize());
+      }, 50);
+    }
+
+    function applyFilters() {
+      const year = document.getElementById('filterYear').value;
+      const region = document.getElementById('filterRegion').value;
+      const cat = document.getElementById('filterCategory').value;
+      const seg = document.getElementById('filterSegment').value;
+
+      filteredData = RAW_SALES_DATA.filter(d => {
+        if (year !== 'ALL' && d.Year.toString() !== year) return false;
+        if (region !== 'ALL' && d.Region !== region) return false;
+        if (cat !== 'ALL' && d.Category !== cat) return false;
+        if (seg !== 'ALL' && d.Segment !== seg) return false;
+        return true;
+      });
+
+      updateKPIs();
+      renderAllCharts();
+      renderTable();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterYear').value = 'ALL';
+      document.getElementById('filterRegion').value = 'ALL';
+      document.getElementById('filterCategory').value = 'ALL';
+      document.getElementById('filterSegment').value = 'ALL';
+      applyFilters();
+    }
+
+    function updateKPIs() {
+      const totalSales = filteredData.reduce((acc, d) => acc + d.Sales, 0);
+      const totalProfit = filteredData.reduce((acc, d) => acc + d.Profit, 0);
+      const orderSet = new Set(filteredData.map(d => d['Order ID']));
+      const totalOrders = orderSet.size;
+      const totalQty = filteredData.reduce((acc, d) => acc + d.Quantity, 0);
+
+      const marginPct = totalSales > 0 ? (totalProfit / totalSales) * 100 : 0;
+      const aov = totalOrders > 0 ? (totalSales / totalOrders) : 0;
+
+      document.getElementById('kpiSales').innerText = formatCurrency(totalSales);
+      document.getElementById('kpiProfit').innerText = formatCurrency(totalProfit);
+      
+      const kpiProfitEl = document.getElementById('kpiProfit');
+      kpiProfitEl.style.color = totalProfit >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+
+      const kpiMarginEl = document.getElementById('kpiMargin');
+      kpiMarginEl.innerText = marginPct.toFixed(2) + '%';
+      kpiMarginEl.style.color = marginPct >= 10 ? 'var(--accent-emerald)' : (marginPct > 0 ? 'var(--accent-amber)' : 'var(--accent-rose)');
+
+      document.getElementById('kpiOrders').innerText = totalOrders.toLocaleString();
+      document.getElementById('kpiOrdersSub').innerText = `${totalQty.toLocaleString()} units sold`;
+      document.getElementById('kpiAOV').innerText = '$' + Math.round(aov).toLocaleString();
+    }
+
+    function formatCurrency(val) {
+      if (Math.abs(val) >= 1e6) {
+        return '$' + (val / 1e6).toFixed(2) + 'M';
+      } else if (Math.abs(val) >= 1e3) {
+        return '$' + (val / 1e3).toFixed(1) + 'K';
+      }
+      return '$' + val.toFixed(0);
+    }
+
+    function renderAllCharts() {
+      renderTrendChart();
+      renderSegmentChart();
+      renderRegionBarChart();
+      renderCategoryProfitChart();
+      renderRegionMarginChart();
+      renderRegionDiscountChart();
+      renderSubcatFullChart();
+    }
+
+    function renderTrendChart() {
+      // Group by Year-Month
+      const monthlyMap = {};
+      filteredData.forEach(d => {
+        const ym = d['Order Date'].substring(0, 7);
+        if (!monthlyMap[ym]) monthlyMap[ym] = { sales: 0, profit: 0 };
+        monthlyMap[ym].sales += d.Sales;
+        monthlyMap[ym].profit += d.Profit;
+      });
+
+      const sortedKeys = Object.keys(monthlyMap).sort();
+      const salesVals = sortedKeys.map(k => monthlyMap[k].sales / 1e3);
+      const profitVals = sortedKeys.map(k => monthlyMap[k].profit / 1e3);
+
+      if (chartInstances['trend']) chartInstances['trend'].destroy();
+
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      chartInstances['trend'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sortedKeys,
+          datasets: [
+            {
+              label: 'Sales ($K)',
+              data: salesVals,
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.3,
+              fill: true,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Net Profit ($K)',
+              data: profitVals,
+              borderColor: '#10B981',
+              backgroundColor: '#10B981',
+              borderWidth: 2,
+              pointRadius: 2,
+              tension: 0.3,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: { ticks: { color: '#94A3B8', maxTicksLimit: 12 }, grid: { color: '#243048' } },
+            y: {
+              type: 'linear', display: true, position: 'left',
+              ticks: { color: '#94A3B8', callback: v => '$' + v + 'K' },
+              grid: { color: '#243048' }
+            },
+            y1: {
+              type: 'linear', display: true, position: 'right',
+              ticks: { color: '#10B981', callback: v => '$' + v + 'K' },
+              grid: { drawOnChartArea: false }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#F8FAFC' } }
+          }
+        }
+      });
+    }
+
+    function renderSegmentChart() {
+      const segMap = {};
+      filteredData.forEach(d => {
+        segMap[d.Segment] = (segMap[d.Segment] || 0) + d.Sales;
+      });
+
+      const labels = Object.keys(segMap);
+      const dataVals = labels.map(l => segMap[l]);
+
+      if (chartInstances['segment']) chartInstances['segment'].destroy();
+
+      const ctx = document.getElementById('segmentChart').getContext('2d');
+      chartInstances['segment'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataVals,
+            backgroundColor: ['#2563EB', '#06B6D4', '#F59E0B'],
+            borderWidth: 2,
+            borderColor: '#151D2F'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#F8FAFC', font: { size: 12 } } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((ctx.raw / total) * 100).toFixed(1);
+                  return ` ${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRegionBarChart() {
+      const regMap = {};
+      filteredData.forEach(d => {
+        regMap[d.Region] = (regMap[d.Region] || 0) + d.Sales;
+      });
+
+      const labels = ['West', 'East', 'Central', 'South'];
+      const dataVals = labels.map(l => (regMap[l] || 0) / 1e6);
+
+      if (chartInstances['regionBar']) chartInstances['regionBar'].destroy();
+
+      const ctx = document.getElementById('regionBarChart').getContext('2d');
+      chartInstances['regionBar'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Sales ($ Millions)',
+            data: dataVals,
+            backgroundColor: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94A3B8' }, grid: { display: false } },
+            y: { ticks: { color: '#94A3B8', callback: v => '$' + v.toFixed(1) + 'M' }, grid: { color: '#243048' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderCategoryProfitChart() {
+      const subMap = {};
+      filteredData.forEach(d => {
+        subMap[d['Sub-Category']] = (subMap[d['Sub-Category']] || 0) + d.Profit;
+      });
+
+      const sortedSubcats = Object.keys(subMap).sort((a, b) => subMap[a] - subMap[b]);
+      const profits = sortedSubcats.map(s => subMap[s] / 1e3);
+      const colors = profits.map(p => p < 0 ? '#EF4444' : (p > 100 ? '#10B981' : '#3B82F6'));
+
+      if (chartInstances['subProfit']) chartInstances['subProfit'].destroy();
+
+      const ctx = document.getElementById('categoryProfitChart').getContext('2d');
+      chartInstances['subProfit'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedSubcats,
+          datasets: [{
+            label: 'Net Profit ($K)',
+            data: profits,
+            backgroundColor: colors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94A3B8', callback: v => '$' + v + 'K' }, grid: { color: '#243048' } },
+            y: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderRegionMarginChart() {
+      const regMap = {};
+      filteredData.forEach(d => {
+        if (!regMap[d.Region]) regMap[d.Region] = { sales: 0, profit: 0 };
+        regMap[d.Region].sales += d.Sales;
+        regMap[d.Region].profit += d.Profit;
+      });
+
+      const labels = ['West', 'East', 'Central', 'South'];
+      const margins = labels.map(l => {
+        const item = regMap[l] || { sales: 0, profit: 0 };
+        return item.sales > 0 ? (item.profit / item.sales) * 100 : 0;
+      });
+
+      if (chartInstances['regMargin']) chartInstances['regMargin'].destroy();
+
+      const ctx = document.getElementById('regionMarginChart').getContext('2d');
+      chartInstances['regMargin'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Profit Margin %',
+            data: margins,
+            backgroundColor: margins.map(m => m >= 11 ? '#10B981' : '#F59E0B'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94A3B8' }, grid: { display: false } },
+            y: { ticks: { color: '#94A3B8', callback: v => v.toFixed(1) + '%' }, grid: { color: '#243048' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderRegionDiscountChart() {
+      const regMap = {};
+      filteredData.forEach(d => {
+        if (!regMap[d.Region]) regMap[d.Region] = { discTotal: 0, count: 0 };
+        regMap[d.Region].discTotal += d.Discount;
+        regMap[d.Region].count += 1;
+      });
+
+      const labels = ['West', 'East', 'Central', 'South'];
+      const avgDiscs = labels.map(l => {
+        const item = regMap[l] || { discTotal: 0, count: 1 };
+        return (item.discTotal / item.count) * 100;
+      });
+
+      if (chartInstances['regDisc']) chartInstances['regDisc'].destroy();
+
+      const ctx = document.getElementById('regionDiscountChart').getContext('2d');
+      chartInstances['regDisc'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Avg Discount %',
+            data: avgDiscs,
+            backgroundColor: '#8B5CF6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94A3B8' }, grid: { display: false } },
+            y: { ticks: { color: '#94A3B8', callback: v => v.toFixed(1) + '%' }, grid: { color: '#243048' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderSubcatFullChart() {
+      const subMap = {};
+      filteredData.forEach(d => {
+        if (!subMap[d['Sub-Category']]) subMap[d['Sub-Category']] = { sales: 0, profit: 0 };
+        subMap[d['Sub-Category']].sales += d.Sales;
+        subMap[d['Sub-Category']].profit += d.Profit;
+      });
+
+      const labels = Object.keys(subMap).sort((a, b) => subMap[b].sales - subMap[a].sales);
+      const sales = labels.map(l => subMap[l].sales / 1e3);
+      const profits = labels.map(l => subMap[l].profit / 1e3);
+
+      if (chartInstances['subcatFull']) chartInstances['subcatFull'].destroy();
+
+      const ctx = document.getElementById('subcatFullChart').getContext('2d');
+      chartInstances['subcatFull'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Sales ($K)', data: sales, backgroundColor: '#3B82F6', borderRadius: 4 },
+            { label: 'Net Profit ($K)', data: profits, backgroundColor: '#10B981', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94A3B8', font: { size: 11 } }, grid: { display: false } },
+            y: { ticks: { color: '#94A3B8', callback: v => '$' + v + 'K' }, grid: { color: '#243048' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#F8FAFC' } }
+          }
+        }
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('rawTableBody');
+      tbody.innerHTML = '';
+
+      const slice = filteredData.slice(0, 50);
+      slice.forEach(d => {
+        const tr = document.createElement('tr');
+        const margin = d.Sales > 0 ? ((d.Profit / d.Sales) * 100).toFixed(1) : '0.0';
+        tr.innerHTML = `
+          <td>${d['Order ID']}</td>
+          <td>${d['Order Date']}</td>
+          <td>${d.Region}</td>
+          <td>${d.Segment}</td>
+          <td>${d.Category}</td>
+          <td>${d['Sub-Category']}</td>
+          <td>$${d.Sales.toLocaleString()}</td>
+          <td class="${d.Profit >= 0 ? 'text-positive' : 'text-negative'}">$${d.Profit.toLocaleString()}</td>
+          <td>${margin}%</td>
+          <td>${(d.Discount * 100).toFixed(0)}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('tableRecordCount').innerText = `Total Filtered: ${filteredData.length.toLocaleString()} rows`;
+    }
+
+    function exportFilteredCSV() {
+      const headers = ['Order ID', 'Order Date', 'Year', 'Region', 'Segment', 'Category', 'Sub-Category', 'Sales', 'Profit', 'Quantity', 'Discount'];
+      let csvContent = "data:text/csv;charset=utf-8," + headers.join(',') + "\n";
+
+      filteredData.forEach(d => {
+        const row = [
+          d['Order ID'], d['Order Date'], d.Year, d.Region, d.Segment, 
+          `"${d.Category}"`, `"${d['Sub-Category']}"`, d.Sales, d.Profit, d.Quantity, d.Discount
+        ];
+        csvContent += row.join(',') + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `filtered_sales_data_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      applyFilters();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+<workbook source-build="2023.3.0" source-platform="win" version="18.1" xmlns:user="http://www.tableausoftware.com/xml/user">
+  <preferences />
+  <datasources>
+    <datasource caption="Sales Financial Dataset" inline="true" name="federated.sales_financial" version="18.1">
+      <connection class="federated">
+        <named-connections>
+          <named-connection caption="sales_financial_dataset" name="textscan.sales_financial">
+            <connection class="textscan" directory="../data" filename="sales_financial_dataset.csv" separator="," />
+          </named-connection>
+        </named-connections>
+      </connection>
+      <column caption="Profit Margin %" datatype="real" default-format="p0.0%" name="[Calculation_ProfitMargin]" role="measure" type="quantitative">
+        <calculation class="tableau" formula="SUM([Profit]) / SUM([Sales])" />
+      </column>
+      <column caption="Profit Status" datatype="string" name="[Calculation_ProfitStatus]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="IF SUM([Profit]) &gt;= 0 THEN &quot;Profitable&quot; ELSE &quot;Unprofitable&quot; END" />
+      </column>
+      <column caption="Target Variance %" datatype="real" default-format="p0.0%" name="[Calculation_TargetVariance]" role="measure" type="quantitative">
+        <calculation class="tableau" formula="(SUM([Sales]) - SUM([Target Sales])) / SUM([Target Sales])" />
+      </column>
+      <column caption="Region Benchmark Sales" datatype="real" name="[Calculation_RegionLOD]" role="measure" type="quantitative">
+        <calculation class="tableau" formula="{ FIXED [Region] : SUM([Sales]) }" />
+      </column>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name="KPI_Scorecards">
+      <table>
+        <view>
+          <datasources />
+        </view>
+        <panes />
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="Monthly_Sales_Profit_Trend">
+      <table>
+        <view>
+          <datasources />
+        </view>
+        <panes />
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="Regional_Performance">
+      <table>
+        <view>
+          <datasources />
+        </view>
+        <panes />
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="SubCategory_Profit_Matrix">
+      <table>
+        <view>
+          <datasources />
+        </view>
+        <panes />
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="Customer_Segment_Share">
+      <table>
+        <view>
+          <datasources />
+        </view>
+        <panes />
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard name="Executive_Sales_Performance_Dashboard">
+      <style />
+      <size maxheight="900" maxwidth="1440" minheight="900" minwidth="1440" sizing-mode="fixed" />
+      <zones>
+        <zone h="100000" id="1" type-v2="layout-basic" w="100000" x="0" y="0" />
+      </zones>
+    </dashboard>
+  </dashboards>
+</workbook>
